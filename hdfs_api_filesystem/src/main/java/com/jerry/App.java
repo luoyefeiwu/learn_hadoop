@@ -41,5 +41,12 @@ public class App {
             System.out.println("DataNode节点的名字" + datanodeInfo.getHostName());
         }
 
+        //删除 HDFS 目录及文件
+        boolean bndel = fs.delete(pathdir, true);
+        //删除成功为true
+        System.out.println("删除HDFS 目录及文件:" + bndel);
+        //5.释放 fs 持有的Blocks
+        fs.close();
+
     }
 }
