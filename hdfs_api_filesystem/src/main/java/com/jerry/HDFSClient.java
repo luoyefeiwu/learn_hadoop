@@ -3,6 +3,7 @@ package com.jerry;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.io.IOUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,6 +21,7 @@ public class HDFSClient {
         System.out.println("Before!!!!!!!");
     }
 
+    @After
     public void after() throws IOException {
         fs.close();
         System.out.println("After!!!!!!");
@@ -29,8 +31,7 @@ public class HDFSClient {
     public void put() throws Exception {
         //获取 hdfs 封装对象
         FileSystem fileSystem = FileSystem.get(URI.create("hdfs://hadoop01:8020"), new Configuration());
-        //fileSystem.copyFromLocalFile(new Path("d://log.txt"), new Path("/"));
-        fileSystem.copyToLocalFile(new Path("/test"), new Path("d://"));
+        fileSystem.copyFromLocalFile(new Path("d://log.txt"), new Path("/"));
         //关闭操作对象
         fileSystem.close();
     }
@@ -39,7 +40,8 @@ public class HDFSClient {
     public void get() throws Exception {
         //获取 hdfs 封装对象
         FileSystem fileSystem = FileSystem.get(URI.create("hdfs://hadoop01:8020"), new Configuration());
-        fileSystem.copyFromLocalFile(new Path("d://log.txt"), new Path("/"));
+        fileSystem.copyToLocalFile(new Path("/test"), new Path("d://"));
+        ;
         //关闭操作对象
         fileSystem.close();
     }
