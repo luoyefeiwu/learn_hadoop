@@ -6,7 +6,11 @@
 
     <groupId>com.jerry</groupId>
     <artifactId>hdfs_api_filesystem</artifactId>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>..</module>
+    </modules>
 
     <name>hdfs_api_filesystem</name>
     <!-- FIXME change it to the project's website -->
