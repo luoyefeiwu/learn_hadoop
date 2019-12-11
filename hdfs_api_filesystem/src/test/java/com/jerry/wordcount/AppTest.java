@@ -1,4 +1,4 @@
-package com.jerry;
+package com.jerry.wordcount;
 
 import static org.junit.Assert.assertTrue;
 
