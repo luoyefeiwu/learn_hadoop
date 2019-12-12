@@ -15,6 +15,16 @@ public class FlowBean implements Writable {
     public FlowBean() {
     }
 
+    @Override
+    public String toString() {
+        return upFlow + "\t" + downFlow + "\t" + sumFlow;
+    }
+
+    public void set(long upFlow, long downFlow) {
+        this.upFlow = upFlow;
+        this.downFlow = downFlow;
+        this.sumFlow = upFlow + downFlow;
+    }
 
     public long getUpFlow() {
         return upFlow;
@@ -40,13 +50,27 @@ public class FlowBean implements Writable {
         this.sumFlow = sumFlow;
     }
 
+    /**
+     * 序列化方法
+     *
+     * @throws IOException
+     */
     @Override
-    public void write(DataOutput dataOutput) throws IOException {
-        
+    public void write(DataOutput out) throws IOException {
+        out.writeLong(upFlow);
+        out.writeLong(downFlow);
+        out.writeLong(sumFlow);
     }
 
+    /**
+     * 反序列化
+     *
+     * @throws IOException
+     */
     @Override
-    public void readFields(DataInput dataInput) throws IOException {
-
+    public void readFields(DataInput in) throws IOException {
+        upFlow = in.readLong();
+        downFlow = in.readLong();
+        sumFlow = in.readLong();
     }
 }
