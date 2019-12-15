@@ -41,7 +41,6 @@ public class HDFSClient {
         //获取 hdfs 封装对象
         FileSystem fileSystem = FileSystem.get(URI.create("hdfs://hadoop01:8020"), new Configuration());
         fileSystem.copyToLocalFile(new Path("/test"), new Path("d://"));
-        ;
         //关闭操作对象
         fileSystem.close();
     }

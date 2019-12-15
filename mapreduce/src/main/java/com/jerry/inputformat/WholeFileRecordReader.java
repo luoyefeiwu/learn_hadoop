@@ -1,16 +1,34 @@
 package com.jerry.inputformat;
 
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
+/**
+ * 自定义 RecordReader，处理一个文件，将文件读成 一个 key value
+ */
 public class WholeFileRecordReader extends RecordReader<Text, BytesWritable> {
+
+    private boolean notRead = true;
+
+    private Text key = new Text();
+    private BytesWritable value = new BytesWritable();
+
+    private FSDataInputStream inputStream;
+    FileSplit fs;
+
     /**
-     * 初始化
+     * 初始化,只调用了一次
      *
      * @param split
      * @param context
@@ -19,7 +37,14 @@ public class WholeFileRecordReader extends RecordReader<Text, BytesWritable> {
      */
     @Override
     public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
-
+        //转换切片类型到文件切片
+        fs = (FileSplit) split;
+        //通过切片获取路径
+        Path path = fs.getPath();
+        //通过路径获取文件系统
+        FileSystem fileSystem = path.getFileSystem(context.getConfiguration());
+        // 开流
+        inputStream = fileSystem.open(path);
     }
 
     /**
@@ -31,7 +56,18 @@ public class WholeFileRecordReader extends RecordReader<Text, BytesWritable> {
      */
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        return false;
+        if (notRead) {
+            notRead = false;
+            //设置key
+            key.set(fs.getPath().toString());
+            byte[] buf = new byte[(int) fs.getLength()];
+            inputStream.read(buf);
+            //设置value
+            value.set(buf, 0, buf.length);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -43,7 +79,7 @@ public class WholeFileRecordReader extends RecordReader<Text, BytesWritable> {
      */
     @Override
     public Text getCurrentKey() throws IOException, InterruptedException {
-        return null;
+        return key;
     }
 
     /**
@@ -55,7 +91,7 @@ public class WholeFileRecordReader extends RecordReader<Text, BytesWritable> {
      */
     @Override
     public BytesWritable getCurrentValue() throws IOException, InterruptedException {
-        return null;
+        return value;
     }
 
     /**
@@ -67,7 +103,7 @@ public class WholeFileRecordReader extends RecordReader<Text, BytesWritable> {
      */
     @Override
     public float getProgress() throws IOException, InterruptedException {
-        return 0;
+        return notRead ? 0 : 1;
     }
 
     /**
@@ -77,6 +113,8 @@ public class WholeFileRecordReader extends RecordReader<Text, BytesWritable> {
      */
     @Override
     public void close() throws IOException {
-
+        if (inputStream != null) {
+            IOUtils.closeStream(inputStream);
+        }
     }
 }
