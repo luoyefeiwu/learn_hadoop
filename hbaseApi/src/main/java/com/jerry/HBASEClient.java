@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -103,5 +104,86 @@ public class HBASEClient {
         table.put(put);
         table.close();
         System.out.println("插入数据成功");
+    }
+
+    /**
+     * 获取所以行数据
+     */
+    @Test
+    public void getAllRows() throws IOException {
+        TableName tableName = TableName.valueOf("student1");
+        Table table = connection.getTable(tableName);
+        Scan scan = new Scan();
+        ResultScanner scanner = table.getScanner(scan);
+        for (Result result : scanner) {
+            Cell[] cells = result.rawCells();
+            for (Cell cell : cells) {
+                //得到rowkey
+                System.out.println("行键:" + Bytes.toString(CellUtil.cloneRow(cell)));
+                //得到列族
+                System.out.println("列族" + Bytes.toString(CellUtil.cloneFamily(cell)));
+                System.out.println("列:" + Bytes.toString(CellUtil.cloneQualifier(cell)));
+                System.out.println("值:" + Bytes.toString(CellUtil.cloneValue(cell)));
+            }
+        }
+        table.close();
+    }
+
+    /**
+     * 删除行
+     */
+    @Test
+    public void deleteRow() throws IOException {
+        TableName tableName = TableName.valueOf("student1");
+        Table table = connection.getTable(tableName);
+        Delete delete = new Delete("10001".getBytes());
+        table.delete(delete);
+        table.close();
+        System.out.println("删除数据");
+    }
+
+    /**
+     * 获取某一行
+     */
+    @Test
+    public void getRow() throws IOException {
+        TableName tableName = TableName.valueOf("student1");
+        String rowKey = "10001";
+        Table table = connection.getTable(tableName);
+        Get get = new Get(rowKey.getBytes());
+        //get.setMaxVersions();显示所有版本
+        //get.setTimeStamp();显示指定时间戳的版本
+        Result result = table.get(get);
+        for (Cell cell : result.rawCells()) {
+            System.out.println("行键:" + Bytes.toString(result.getRow()));
+            System.out.println("列族" + Bytes.toString(CellUtil.cloneFamily(cell)));
+            System.out.println("列:" + Bytes.toString(CellUtil.cloneQualifier(cell)));
+            System.out.println("值:" + Bytes.toString(CellUtil.cloneValue(cell)));
+            System.out.println("时间戳:" + cell.getTimestamp());
+        }
+        table.close();
+    }
+
+    /**
+     * 获取某一行指定“列族:列”
+     */
+    @Test
+    public void getRowQualifier() throws IOException {
+        String rowKey = "10001";
+        String columnFamily = "name";
+        String qualifier = "info";
+        TableName tableName = TableName.valueOf("student1");
+        Table table = connection.getTable(tableName);
+        Get get = new Get(Bytes.toBytes(rowKey));
+        get.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier));
+
+        Result result = table.get(get);
+        for (Cell cell : result.rawCells()) {
+            System.out.println("行键:" + Bytes.toString(result.getRow()));
+            System.out.println("列族" + Bytes.toString(CellUtil.cloneFamily(cell)));
+            System.out.println("列:" + Bytes.toString(CellUtil.cloneQualifier(cell)));
+            System.out.println("值:" + Bytes.toString(CellUtil.cloneValue(cell)));
+        }
+        table.close();
     }
 }
