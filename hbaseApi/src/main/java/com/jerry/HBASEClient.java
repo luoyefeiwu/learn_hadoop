@@ -1,12 +1,10 @@
 package com.jerry;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,6 +23,14 @@ public class HBASEClient {
         //在HBase中管理、访问表需要先创建HBaseAdmin对象
         connection = ConnectionFactory.createConnection(conf);
     }
+
+    @After
+    public void after() throws IOException {
+        if (connection != null) {
+            connection.close();
+        }
+    }
+
 
     /**
      * 判断表是否存在
@@ -83,22 +89,19 @@ public class HBASEClient {
      */
     @Test
     public void addRowData() throws IOException {
+        String rowKey = "10001";
+        String columnFamily = "name";
+        String tableName = "student1";
+        String column = "info";
+        String value = "张三";
+        Table table = connection.getTable(TableName.valueOf(tableName));
 
-        String rowKey = "";
-        String columnFamily = "";
-        String tableName = "";
-        String column = "";
-        String value = "";
-
-
-//        //创建HTable对象
-//        HTable hTable = new HTable(conf, tableName);
-//        //向表中插入数据
-//        Put put = new Put(Bytes.toBytes(rowKey));
-//        //向Put对象中组装数据
-//        put.add(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(value));
-//        hTable.put(put);
-//        hTable.close();
+        //向表中插入数据
+        Put put = new Put(Bytes.toBytes(rowKey));
+        //向Put对象中组装数据
+        put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(column), Bytes.toBytes(value));
+        table.put(put);
+        table.close();
         System.out.println("插入数据成功");
     }
 }
