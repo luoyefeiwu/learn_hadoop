@@ -19,7 +19,8 @@ public class HBASEClient {
     @Before
     public void before() throws IOException {
         Configuration conf = HBaseConfiguration.create();
-        conf.set("hbase.zookeeper.quorum", "192.168.1.183");
+        //host 文件 hadoop01  192.168.50.200
+        conf.set("hbase.zookeeper.quorum", "hadoop01");
         conf.set("hbase.zookeeper.property.clientPort", "2181");
         //在HBase中管理、访问表需要先创建HBaseAdmin对象
         connection = ConnectionFactory.createConnection(conf);
